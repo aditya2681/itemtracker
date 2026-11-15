@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env.local
+.env.*.local
+.convex/
+coverage/
+playwright-report/
+test-results/
