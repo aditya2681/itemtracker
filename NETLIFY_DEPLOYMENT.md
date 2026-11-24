@@ -24,6 +24,13 @@ Choose to create a **new** site using the existing `itemtracker` Git repository.
 
 ## Later updates
 
-Run `npm run lint`, `npm test`, and `npm run build`, review changes, commit and push to `main`. Netlify runs checks and publishes the new frontend. Backend changes need their own reviewed Convex deployment. Keep database snapshots, local environment files, CLI state and private keys out of Git.
+From `/Users/aditya/Documents/itemtracker`, follow these steps:
+
+1. Review `git status` and `git diff`. Run `npm run lint`, `npm test`, and `npm run build`.
+2. If backend files under `convex/` changed, check the production target with `npx convex dashboard --prod --no-open`. It must be `benevolent-mosquito-853`. Check the migration and compatibility impact, then run `npx convex deploy` and verify the output and production functionality. This deploys functions and schema; it does not automatically copy or delete data. For schema/data migrations, use a separately reviewed migration plan.
+3. Commit only the intended files (`git add <files>` then `git commit -m "Describe the change"`) and run `git push origin main`.
+4. For a connected Netlify project, open its **Deploys** tab, confirm the new commit succeeds, then verify the production URL on a phone. Netlify builds and publishes the frontend; pushing to GitHub alone does not deploy the Convex backend.
+
+Keep database snapshots, local environment files, CLI state and private keys out of Git. Never select the MyBilling project for this app.
 
 The production Convex `SITE_URL` was absent when checked. Current username/password auth uses the Convex client directly; browser sign-in on the final Netlify origin still needs verification. Review auth redirect settings if adding OAuth or redirect-based recovery. Business flows beyond the existing tests have not been certified; see the delivery checklist for remaining work.

@@ -16,6 +16,7 @@ import type * as migration from "../migration.js";
 import type * as model_authz from "../model/authz.js";
 import type * as rates from "../rates.js";
 import type * as users from "../users.js";
+import type * as workspaceRecovery from "../workspaceRecovery.js";
 import type * as workspaces from "../workspaces.js";
 
 import type {
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   "model/authz": typeof model_authz;
   rates: typeof rates;
   users: typeof users;
+  workspaceRecovery: typeof workspaceRecovery;
   workspaces: typeof workspaces;
 }>;
 
