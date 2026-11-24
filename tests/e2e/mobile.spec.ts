@@ -32,6 +32,8 @@ test('mobile item defaults, enquiries, bill and independent rate filters', async
   await page.getByLabel('Name', { exact: true }).fill('Test supplier');
   await page.getByRole('button', { name: 'Save distributor' }).click();
   await page.getByRole('button', { name: 'Log enquiry' }).click();
+  await expect(page.getByRole('combobox', { name: 'Distributor', exact: true })).toHaveValue('Test supplier');
+  await expect(page.getByRole('combobox', { name: 'Item', exact: true })).toHaveCSS('font-size', '16px');
   for (const [name, amount] of [['Sugar', '1000'], ['Rice', '2000']]) {
     await page.getByRole('combobox', { name: 'Item', exact: true }).fill(name);
     await page.getByRole('option', { name: new RegExp(name) }).click();
@@ -53,6 +55,8 @@ test('mobile item defaults, enquiries, bill and independent rate filters', async
   await expect(page.getByText('Rice', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Bills', exact: true }).click();
   await page.getByRole('button', { name: 'New bill' }).click();
+  await page.getByRole('combobox', { name: 'Distributor', exact: true }).fill('Test supplier');
+  await page.getByRole('option', { name: /Test supplier/ }).click();
   await page.getByRole('combobox', { name: 'Item', exact: true }).fill('Sugar');
   await page.getByRole('option', { name: /Sugar/ }).click();
   await page.getByLabel('Quantity (bag)').fill('4');
@@ -72,5 +76,25 @@ test('mobile item defaults, enquiries, bill and independent rate filters', async
   await expect(page.getByText('No bills yet. Add a purchase to get started.')).toBeVisible();
   await page.getByRole('button', { name: 'Rates', exact: true }).click();
   await expect(page.getByText('Bill deleted, price retained')).toBeVisible();
+  await page.getByRole('button', { name: 'Items', exact: true }).click();
+  await page.getByRole('button', { name: /Sugar/ }).click();
+  await page.getByRole('button', { name: 'Log enquiry' }).click();
+  await expect(page.getByRole('combobox', { name: 'Item', exact: true })).toHaveValue('Sugar');
+  await page.getByRole('combobox', { name: 'Distributor', exact: true }).fill('Test supplier');
+  await page.getByRole('option', { name: /Test supplier/ }).click();
+  const totalPrice = page.getByLabel('Total price (₹)');
+  await totalPrice.fill('5000');
+  await totalPrice.hover();
+  await page.mouse.wheel(0, 100);
+  await expect(totalPrice).toHaveValue('5000');
+  await totalPrice.press('ArrowDown');
+  await expect(totalPrice).toHaveValue('5000');
+  await page.getByRole('button', { name: 'Add item to enquiry' }).click();
+  await expect(page.getByText(/₹5,000\.00/)).toBeVisible();
+  await page.getByRole('combobox', { name: 'Item', exact: true }).fill('Rice');
+  await page.getByRole('option', { name: /Rice/ }).click();
+  await page.getByLabel('Total price (₹)').fill('700');
+  await page.getByRole('button', { name: 'Save enquiries' }).click();
+  await expect(page.getByText('Enquiries saved.')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
