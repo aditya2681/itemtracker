@@ -1,0 +1,76 @@
+import { test, expect } from '@playwright/test';
+
+test('mobile item defaults, enquiries, bill and independent rate filters', async ({ page }) => {
+  await page.goto('/');
+  await page.getByText('New here? Create an account').click();
+  const suffix = `${Date.now()}${Math.floor(Math.random() * 10000)}`;
+  await page.getByLabel('Username').fill(`mobile${suffix}`);
+  await page.getByLabel('Password').fill(`Test${suffix}!Secure`);
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await page.getByLabel('Business name').fill('Mobile verification');
+  await page.getByRole('button', { name: 'Create workspace' }).click();
+  await page.getByRole('button', { name: 'Items', exact: true }).click();
+  for (const name of ['Sugar', 'Rice']) {
+    await page.getByRole('button', { name: 'Add item' }).click();
+    await page.getByLabel('Name', { exact: true }).fill(name);
+    await page.getByLabel('Default quantity').fill('50');
+    await page.getByRole('button', { name: 'Save item' }).click();
+    await expect(page.getByRole('button', { name: new RegExp(name) })).toBeVisible();
+  }
+  await page.getByPlaceholder('Search items, aliases or SKU').fill('sug');
+  await expect(page.getByRole('button', { name: /Sugar/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Rice/ })).toHaveCount(0);
+  await page.getByRole('button', { name: /Sugar/ }).click();
+  await page.getByRole('button', { name: 'Edit item' }).first().click();
+  await page.getByLabel('Default quantity').fill('25');
+  await page.getByRole('button', { name: 'Save item' }).click();
+  await expect(page.getByText('Item defaults saved. Existing price history is unchanged.')).toBeVisible();
+  await expect(page.getByText('25 KG / bag')).toBeVisible();
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  await page.getByRole('button', { name: /Distributors/ }).click();
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByLabel('Name', { exact: true }).fill('Test supplier');
+  await page.getByRole('button', { name: 'Save distributor' }).click();
+  await page.getByRole('button', { name: 'Log enquiry' }).click();
+  for (const [name, amount] of [['Sugar', '1000'], ['Rice', '2000']]) {
+    await page.getByRole('combobox', { name: 'Item', exact: true }).fill(name);
+    await page.getByRole('option', { name: new RegExp(name) }).click();
+    await page.getByLabel('Quantity (bag)').fill('2');
+    await page.getByLabel('Total price (₹)').fill(amount);
+    await expect(page.getByText('₹20.00', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Add item to enquiry' }).click();
+  }
+  await page.getByRole('button', { name: 'Save enquiries' }).click();
+  await expect(page.getByText('Enquiries saved.')).toBeVisible();
+  await page.getByRole('combobox', { name: 'Item · optional' }).fill('Sugar');
+  await page.getByRole('option', { name: /Sugar/ }).click();
+  await expect(page.getByText('Test supplier', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Rice', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page.getByRole('combobox', { name: 'Distributor · optional' }).fill('Test supplier');
+  await page.getByRole('option', { name: /Test supplier/ }).click();
+  await expect(page.getByText('Sugar', { exact: true })).toBeVisible();
+  await expect(page.getByText('Rice', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Bills', exact: true }).click();
+  await page.getByRole('button', { name: 'New bill' }).click();
+  await page.getByRole('combobox', { name: 'Item', exact: true }).fill('Sugar');
+  await page.getByRole('option', { name: /Sugar/ }).click();
+  await page.getByLabel('Quantity (bag)').fill('4');
+  await page.getByLabel('Total price (₹)').fill('2000');
+  await expect(page.getByText('₹20.00', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Enquiries \(1\)/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Save purchase' }).click();
+  await expect(page.getByText('Purchase saved.')).toBeVisible();
+  await expect(page.getByText('Purchase', { exact: true }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Items', exact: true }).click();
+  await page.getByRole('button', { name: /Sugar/ }).click();
+  await expect(page.getByRole('button', { name: /Purchases \(1\)/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Enquiries \(1\)/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Bills', exact: true }).click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Delete bill' }).click();
+  await expect(page.getByText('No bills yet. Add a purchase to get started.')).toBeVisible();
+  await page.getByRole('button', { name: 'Rates', exact: true }).click();
+  await expect(page.getByText('Bill deleted, price retained')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

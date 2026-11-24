@@ -1,0 +1,21 @@
+[build]
+  command = "npm run lint && npm test && node scripts/netlify-build.mjs"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  VITE_BASE_PATH = "/"
+
+# Public client configuration for the migrated Purchase & Rate database.
+[context.production.environment]
+  VITE_CONVEX_URL = "https://benevolent-mosquito-853.eu-west-1.convex.cloud"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

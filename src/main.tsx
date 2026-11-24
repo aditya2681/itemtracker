@@ -1,0 +1,11 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { ConvexReactClient } from 'convex/react';
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
+import { api } from '../convex/_generated/api';
+import { App } from './App';
+import './style.css';
+const url = import.meta.env.VITE_CONVEX_URL;
+const root = createRoot(document.getElementById('root')!);
+if (!url) root.render(<main className="page"><h1>Connection needed</h1><p>Set VITE_CONVEX_URL in your environment and restart the app.</p></main>);
+else root.render(<StrictMode><ConvexAuthProvider client={new ConvexReactClient(url)} api={{refreshSession:api.auth.refreshSession,signOut:api.auth.signOut,isAuthenticated:api.auth.isAuthenticated}}><App /></ConvexAuthProvider></StrictMode>);

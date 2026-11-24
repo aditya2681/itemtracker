@@ -1,106 +1,51 @@
-# How to run and view the application
+# Purchase & Rate: current run instructions
 
-## Which folder should I use?
+**This implementation is incomplete and is not ready for business data or production deployment.** The app now builds and a preliminary backend has been pushed to the connected Convex development deployment. Sign-in and business flows have not been verified end to end.
 
-Run all commands from the **project root**: the folder that contains `package.json`.
+## Run locally
 
-For this checkout, the project root is:
-
-```text
-/Users/aditya/Documents/itemtracker
-```
-
-In VS Code, open the `itemtracker` folder itself. Do not run `npm` from `src/` or `convex/`.
-
-## Important: this checkout is not ready to show a frontend yet
-
-You have already run `npx convex dev` and selected a cloud deployment. That sets up/runs the Convex backend. It does not create or start the React frontend.
-
-The current files in this checkout do not include `index.html`, a Vite config, or a React app entry point. `npm run dev` can start the Vite server, but there is no app page to render; `npm run build` fails because `index.html` is missing. There is currently no screen to open in the browser.
-
-## Local development once the frontend exists
-
-Use two terminal windows, both opened at the project root.
-
-### Terminal 1 — Convex backend
+Open a terminal in `/Users/aditya/Documents/itemtracker` (the folder containing `package.json`). Install dependencies with `npm ci`, then run:
 
 ```bash
 npx convex dev
 ```
 
-Keep this command running. It watches the `convex/` folder and syncs backend functions to the selected development deployment. If it asks you to log in or select/link a project, complete that flow. Since you already selected a cloud deployment, confirm it is the intended **development** deployment before continuing.
-
-### Terminal 2 — React frontend
-
-macOS/Linux:
+Keep that terminal open. In a second terminal in the same folder, run:
 
 ```bash
-cd /Users/aditya/Documents/itemtracker
-npm install
-npm run dev
+npm run dev -- --host localhost --port 5173
 ```
 
-Windows PowerShell (replace the path with where you cloned the repository):
+Open the `Local` URL printed by Vite. Use the username/password form to sign in or create an account. New passwords must have at least 10 characters. Authentication has not yet been verified in a browser.
+`.env.local` is created by Convex CLI and should contain `VITE_CONVEX_URL`; do not commit it. The current cloud development deployment accepted the schema and functions with `npx convex dev --once`.
 
-```powershell
-cd C:\path\to\itemtracker
-npm install
-npm run dev
-```
+## What exists
 
-Vite normally prints a local address such as `http://localhost:5173/`. Open the exact `Local:` URL printed by Vite. If it prints a different port, use that port.
+The current code includes a username/password login implementation, workspace setup, creation of items and distributors, purchase/enquiry entry, recent price accordions, date filtering of a bounded set of rates, bill soft delete, and a PWA build. These are preliminary and have not been exercised end to end. The server requires authenticated workspace membership for business functions. Purchase rates are stored separately from bills.
 
-## Check the Convex connection
+## Checks performed
 
-The root `.env.local` is created/updated by Convex CLI and is ignored by Git. It should include `VITE_CONVEX_URL` for the frontend to connect to Convex. Do not paste the file contents publicly; deployment values can identify your project. Never put private secrets in a `VITE_` variable because Vite includes those values in the browser bundle.
+- `npm run build`: passed, including PWA asset generation.
+- `npm run lint`: passed.
+- `npm run test`: passed, 11 pricing calculation unit cases.
+- `npx convex dev --once`: passed against the connected development deployment.
+- Browser and passkey login: **not verified**; browser automation failed to initialize.
+- E2E and full business acceptance: **not verified**.
 
-To check which deployment the CLI selected, from the project root run:
+## Netlify deployment
 
-```bash
-npx convex dev
-```
+Hosting is now configured for a separate Netlify project connected to `aditya2681/itemtracker`. See [NETLIFY_DEPLOYMENT.md](NETLIFY_DEPLOYMENT.md) for the production endpoint, first deployment, and update process. The old GitHub Pages workflow has been replaced with verification-only CI. Netlify publication and sign-in on the final origin still need verification.
 
-Read the deployment name shown by the CLI. For an existing cloud project, confirm it matches the development deployment you intended to use. Use the Convex dashboard to inspect its tables and function deployment status.
+## Remaining work
 
-## Deploy the frontend to GitHub Pages
+Bill editing and synchronization with revisions, restore and bulk deletion, draft and attachment upload, category and master editing, supplier links and preferred suppliers, quote edit/void, full indexed pagination and complete filters, offline behavior, full mobile accessibility, authorization and history regression tests, and the complete acceptance matrix remain unfinished. The current UI and data paths do not meet the master specification. Do not deploy for use until these are implemented and validated.
 
-The repository root is the frontend project directory, so run frontend build and GitHub Pages setup from that directory—not from `src/` and not from `convex/`.
+## Username/password and migration status
 
-Once the React/Vite frontend has been implemented and the production build succeeds:
+The development code now uses username/password sign-in and account creation. Convex Auth enforces a minimum of 10 characters for new passwords. The requested `aditya` password is six characters and cannot be used by the supported method; the owner chose to create their own account. The updated authentication code was deployed to the development deployment only; a temporary development account completed backend sign-up and sign-in via Convex CLI, while browser login remains unverified. The updated backend has been deployed to production.
 
-```bash
-npm run build
-```
+A read-only snapshot of stock-tracker (`elated-cassowary-248`) was analyzed. Data has been imported into itemtracker production (`benevolent-mosquito-853`); see the completed status below. Run `python3 scripts/migration/dry_run.py migration/source-stock-tracker.zip` to repeat aggregate diagnostics. The snapshot is private and ignored by Git. See `migration/MIGRATION_REPORT.md` and `migration/MIGRATION_PLAN.md` for counts, unresolved mappings and required work before import.
 
-Then configure GitHub Pages for this repository (usually using a GitHub Actions workflow to publish Vite's `dist/` folder). For a project site such as `https://USERNAME.github.io/REPOSITORY/`, Vite must use the matching repository base path, and client-side routing must support refreshes on nested URLs. Those settings and the Pages workflow are not present in this checkout yet. A custom domain or `USERNAME.github.io` root site uses different base-path settings.
+## Production migration completed
 
-The frontend must be configured with the **production Convex URL** when building the Pages version. Do not use a local-only URL such as `127.0.0.1`. The browser receives the URL, so it is public configuration. Build after setting the correct `VITE_CONVEX_URL` in the deployment workflow/repository variables.
-
-## Current implementation and verified status
-
-As checked on 15 November 2026:
-
-- `npx convex dev --once` previously completed and created a local Convex deployment. You report that you have since selected a cloud deployment; this guide cannot verify the current dashboard selection.
-- This checkout contains generated Convex client types, but no business schema/functions or React frontend screens.
-- `npm run test` passed 11 pricing calculation tests.
-- `npm run typecheck` passed for the existing source.
-- `npm run lint` passed for the existing source.
-- `npm run dev -- --host 127.0.0.1` started Vite and printed `http://127.0.0.1:5174/` because port 5173 was occupied. This only verifies that Vite starts; the app entry/page is missing.
-- `npm run build` failed because there is no `index.html`.
-- `npm run test:e2e` failed because there is no E2E suite.
-
-So right now you can run Convex from the project root, but you cannot yet view the purchase-rate app in a browser. The frontend and backend feature implementation must be completed before local viewing or GitHub Pages deployment.
-
-## Quick commands
-
-From the repository root:
-
-```bash
-# Backend (keep running in terminal 1)
-npx convex dev
-
-# Frontend (terminal 2; available after the app entry files are implemented)
-npm run dev
-```
-
-Open the Vite `Local:` URL in your browser. Vite may start and print a URL, but the app page cannot render until `index.html` and the React entry point are implemented. The missing page is not a Convex deployment error.
+Production workspace Shop now contains 826 imported products, 82 distributors, 256 supplier links, 337 purchase-price records and 1,763 enquiries; no old bills were imported. Local frontend http://localhost:5181/ was started against the production deployment for account creation and verification. The process must be running to use that local address; the GitHub Pages frontend has not been published by this migration. Source records with unknown weight are labelled per quoted unit. See MIGRATION_REPORT.md for verification.

@@ -1,21 +1,29 @@
 # Delivery checklist
 
-Status as of 15 November 2026. This is an incomplete implementation and is not ready for use.
+The implementation is **incomplete** and must not be used for business data yet.
 
-| Requirement | Status | Evidence / remaining work |
+| Area | Status | Evidence or remaining work |
 | --- | --- | --- |
-| Dependency installation and lockfile | PARTIAL | Runtime and dev packages installed; clean `npm ci` not verified. |
-| Official skills | PARTIAL | Convex and other requested skills installed. UI SDK CLI skill renamed and replacement clone failed; bundled SDK skill exists. |
-| Decimal pricing examples and validation | PARTIAL | `npm run test`: 11 passing unit cases. Server recomputation and integration are not implemented. |
-| React PWA, navigation and responsive screens | BLOCKED | Not implemented; production build fails without `index.html`. |
-| Authentication, membership and authorization | BLOCKED | Not implemented or tested. |
-| Item/category and distributor management | BLOCKED | Not implemented. |
-| Enquiries, last-three history and comparisons | BLOCKED | Not implemented. |
-| Bills, drafts, attachments and edits | BLOCKED | Not implemented. |
-| Retained history on bill deletion, revisions and restore | BLOCKED | Not implemented or tested. |
-| Rate analysis, date-only filters and pagination | BLOCKED | Not implemented. |
-| Offline state, accessibility and mobile verification | BLOCKED | Not implemented or tested. |
-| Unit tests and typecheck | PARTIAL | Pricing tests and current source typecheck pass; full application tests do not exist. |
-| End-to-end tests | BLOCKED | `npm run test:e2e` failed; no E2E suite exists. |
-| Convex cloud and GitHub Pages deployment | BLOCKED | No cloud project or auth provider configured; hosting configuration not implemented. |
-| Backup/recovery and production readiness | BLOCKED | Not implemented or tested. |
+| Pricing engine | PARTIAL | 11 unit tests pass; more precision and integration coverage needed. |
+| Convex schema and development push | PARTIAL | `npx convex dev --once` passed; production not deployed. |
+| Login and workspace security | PARTIAL | Passkey and membership code present; login and authorization have not been tested end to end. |
+| Items and distributors | PARTIAL | Create/list implemented with bounded reads; edit, archive, categories and links missing. |
+| Purchases and enquiries | PARTIAL | Creation and recent history implemented; edit, correction audit, drafts and attachments missing. |
+| Bill deletion and retained history | PARTIAL | Soft-delete mutation retains price records; restore, bulk operations and regression tests missing. |
+| Rate analysis | PARTIAL | Date filtering applies to a bounded 100-record client result; full pagination and filters missing. |
+| Mobile UX and accessibility | PARTIAL | Responsive screens implemented; browser interaction and accessibility not verified. |
+| PWA and GitHub Pages | PARTIAL | Build and workflow exist; install and deployment unverified. |
+| Automated checks | PARTIAL | Build, lint and pricing unit tests pass. Full integration and E2E tests missing. |
+
+## Stock Tracker migration and password login
+
+- PARTIAL: Username/password sign-in and create-account UI implemented and development backend pushed; temporary development account sign-up and sign-in passed via CLI. Browser login and production rollout are not verified.
+- PARTIAL: Source snapshot analyzed; 826 products, 82 suppliers, 1,763 enquiries and 337 purchase lines accounted for in read-only diagnostics.
+- BLOCKED: No production account/workspace or import has been created. The destination must support ambiguous rates and provenance, and an idempotent importer with reconciliation and rollback must be implemented and tested first. See `migration/MIGRATION_REPORT.md`.
+
+## Production transfer completed
+
+- PASS: 826 products, 82 distributors, 256 links, 337 purchase prices and 1,763 enquiries imported to Shop; no bills imported.
+- PASS: complete source-to-destination price and relationship reconciliation found no errors; production owner queries return all imported records.
+- PASS: full development rerun inserted no duplicates; sample retries of each production record type skipped correctly.
+- PARTIAL: 1,276 enquiries have no recorded weight and display a quoted-unit rate instead of a per-kg rate.

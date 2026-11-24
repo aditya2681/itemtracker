@@ -1,5 +1,5 @@
-# Purchase & Rate Intelligence
+# Purchase & Rate
 
-See [RUN_APPLICATION.md](RUN_APPLICATION.md) for the project folder, Convex and frontend commands, GitHub Pages notes, and the current implementation status. The frontend is not yet runnable because this checkout has no Vite entry point (`index.html`).
+This application is under development and is not ready for business use. See [RUN_APPLICATION.md](RUN_APPLICATION.md) for local setup and [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md) for implemented and outstanding work.
 
-See [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md) for implementation status and outstanding requirements.
+Frontend hosting is configured for a separate Netlify project. See [Netlify deployment](NETLIFY_DEPLOYMENT.md) for setup, the production database URL, and update instructions.

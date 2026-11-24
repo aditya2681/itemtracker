@@ -1,0 +1,12 @@
+import { defineApp } from 'convex/server';
+import { v } from 'convex/values';
+import auth from '@convex-dev/auth/convex.config.js';
+import passkey from '@convex-dev/auth/components/passkey/convex.config.js';
+import password from '@convex-dev/auth/components/password/convex.config.js';
+import username from '@convex-dev/auth/components/username/convex.config.js';
+const app = defineApp({ env: { PASSKEY_RP_ID: v.optional(v.string()), PASSKEY_ORIGIN: v.optional(v.string()) } });
+app.use(auth);
+app.use(passkey);
+app.use(username);
+app.use(password);
+export default app;
