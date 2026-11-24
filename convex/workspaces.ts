@@ -1,12 +1,16 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import schema from './schema';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { components } from './_generated/api';
-export const mine = query({ args: {}, returns: v.array(schema.doc('members')), handler: async ctx => {
+export const mine = query({ args: {}, returns: v.array(v.object({ workspaceId: v.id('workspaces'), name: v.string(), role: v.union(v.literal('OWNER'), v.literal('EDITOR'), v.literal('VIEWER')) })), handler: async ctx => {
   const identity = await getAuthUserId(ctx, components.auth);
   if (!identity) return [];
-  return await ctx.db.query('members').withIndex('by_identity', q => q.eq('identity', identity)).take(50);
+  const members = await ctx.db.query('members').withIndex('by_identity', q => q.eq('identity', identity)).take(50);
+  const workspaces = await Promise.all(members.filter(member => member.active).map(async member => {
+    const workspace = await ctx.db.get(member.workspaceId);
+    return workspace ? { workspaceId: member.workspaceId, name: workspace.name, role: member.role } : null;
+  }));
+  return workspaces.filter(workspace => workspace !== null);
 }});
 export const create = mutation({ args: { name: v.string() }, returns: v.id('workspaces'), handler: async (ctx, { name }) => {
   const identity = await getAuthUserId(ctx, components.auth);
